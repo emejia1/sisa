@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dpy-jenkins
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 100%
+  selector:
+    matchLabels:
+      app: devops
+  template:
+    metadata:
+      labels:
+        app: devops
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions: [{ key: app, operator: In, values: [devops] }]
+            topologyKey: "kubernetes.io/hostname"
+      containers:
+      - name: jenkins-container
+        image: jenkins-blue:0.0.1
+        ports:
+          - name: port1
+            containerPort: 8080
+      terminationGracePeriodSeconds: 1
